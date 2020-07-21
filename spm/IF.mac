@@ -1,0 +1,127 @@
+         MACRO
+&NAME    IF    &P1,&P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9,&P10,&P11,&P12,&P13,*
+               &P14,&P15,&P16,&P17,&P18,&P19,&P20,&C=
+.*#-------------------------------------------------------------------*
+.*#      IF    MACRO FOR STRUCTURED PROGRAMMING                       *
+.*#----------------------------------------------------23-09-80-RS----*
+.*#
+.*#   FUNCTION:    STARTS A NEW IF LEVEL
+.*#
+.*#   MODEL:       IF  COND1
+.*#                    COND1,OP1,COND2
+.*#                    COND1,OP1,COND2,OP2,COND3,...,CONDN
+.*#
+.*#                -   CONDI : A VALID ASSEMBLE INSTRUCTION WITH
+.*#                            MENOTECNIC CONDITION CODE (IN BRACKETS)
+.*#                            EXAMPLE: (TM,SWITCH,X'04',O)
+.*#                            FOR COMPARE OPERATIONS THE CONDITION-
+.*#                            CODE WILL BE PUT BETWEEN THE OPERANDS
+.*#                            EXAMPLE: (CLC,FIELD1,EQ,FIELD2)
+.*#                -   OPI:    IS ONE OF THE LOGICAL OPERANDS 'AND' OR
+.*#                            'OR'
+.*#                            DO NOT MIX 'AND' AND 'OR' OPERANDS IN
+.*#                            THE SAME IF STATEMENT.
+.*#
+.*#--------------------------------------------------------------------
+         LCLA  &I              INDEX FOR STRING SCANNING
+         LCLA  &N              TOTAL NESTING LEVEL
+         LCLC  &OPND
+         COPY  IFGLO
+.*--------------------------------------------------------------------*
+.*       FIRST IF: INIT GLOBALS                                       *
+.*--------------------------------------------------------------------*
+         AIF   (&IFINIT).START            INIT ALREADY DONE
+&IFINIT  SETB  1
+&IFLEVEL SETA  0
+&DOLEVEL SETA  0
+&IFLABEL SETA  0
+&IFLIMIT SETA  100000
+&IFPRAEF SETC  '##'
+&IFDEBUG SETB  0
+.*--------------------------------------------------------------------*
+.*       INCREMENT LEVEL. GENERATE LABELS FOR FALSE/TRUE              *
+.*--------------------------------------------------------------------*
+.START   ANOP
+&MACNA   SETC  'IF'
+&IFLEVEL SETA  &IFLEVEL+1
+         AIF   (&IFLEVEL EQ 50).FEHL06
+         AIF ('&SYSPARM' EQ '').OBR00
+         AIF ('&SYSPARM'(1,2) EQ 'NO').OBR00
+         AGO     .OBR00
+&NAME    SVDOC   COM=START,C=&C,                                       *
+               &P1,&P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9,&P10,&P11,&P12,&P13,*
+               &P14,&P15,&P16,&P17,&P18,&P19,&P20
+.*
+.OBR00   ANOP
+&IFLABEL SETA  &IFLABEL+1
+         AIF   (&IFLABEL GE &IFLIMIT).FEHL06
+&IFFALSE(&IFLEVEL) SETC '&IFLABEL'    LABEL FOR BRANCH ON NOT TRUE
+&IFTRUE  SETC  ''
+         AIF   ('&SYSLIST(2)' EQ '').STA03 KEIN TRUE LABEL ERFORDERLICH
+&IFLABEL SETA  &IFLABEL+1
+         AIF   (&IFLABEL GE &IFLIMIT).FEHL06
+&IFTRUE  SETC  '&IFLABEL'                  TRUE LABEL FOR AND /OR
+.*--------------------------------------------------------------------*
+.*       CALL IF-PROCESSOR TO ANALYZE CONDITION                       *
+.*--------------------------------------------------------------------*
+.STA03   ANOP
+         IFPRO &IFTRUE,&IFFALSE(&IFLEVEL),&P1,&P2,&P3,&P4,&P5,&P6,&P7, *
+               &P8,&P9,&P10,&P11,&P12,&P13,&P14,&P15,&P16,&P17,&P18,   *
+               &P19,&P20
+.*--------------------------------------------------------------------*
+.*       SET TRUE LABEL IF NECESSARY                                  *
+.*--------------------------------------------------------------------*
+         AIF   ('&IFTRUE' EQ '').MACEND
+&OPND    SETC  '&IFPRAEF&IFTRUE'
+&OPND    DS    0H                        TARGET FOR BANCH ON NOT TRUE
+         AGO   .MACEND
+.*
+.*SYLEE         COPY IFERR
+.*#-------------------------------------------------------------------*
+.*# IFERR: ERROR MESSAGES FOR STRUCTURED PROGRAMMING-MACROS           *
+.*#-------------------------------------------------------------------*
+.FEHL01  MNOTE 8,'IFINIT MACRO NOT FIRST MACRO'
+         AGO   .EREND
+.FEHL02  MNOTE 8,'PRAEFIX BIGGER THAN 7 POSITIONS'
+         AGO   .EREND
+.FEHL03  MNOTE 8,'DEBUG NOT YES OR NO'
+         AGO   .EREND
+.FEHL04  MNOTE 8,'TRACE SWITCH NOT YES OR NO'
+         AGO   .EREND
+.FEHL05  MNOTE 8,'COMPARE CODE NOT IN BRACKETS'
+         AGO   .EREND
+.FEHL06  MNOTE 8,'TOO MUCH STRUCTURED MACROS IN THIS PROGRAM'
+         AGO   .EREND
+.FEHL07  MNOTE 8,'SHOULD NOT OCCUR'
+         AGO   .EREND
+.FEHL08  MNOTE 8,'TOO MUCH OPERANDS IN CONDITION'
+         AGO   .EREND
+.FEHL09  MNOTE 8,'NOT ENOUGH OPERANDS IN CONDITION'
+         AGO   .EREND
+.FEHL10  MNOTE 8,'AND/OR CONTINATION MISSING'
+         AGO   .EREND
+.FEHL11  MNOTE 8,'INVALID COMPARE OPERANDS'
+         AGO   .EREND
+.FEHL12  MNOTE 8,'FROM AND WHILE ARE EXCLUSIVE'
+         AGO   .EREND
+.FEHL13  MNOTE 8,'WHILE PARAMETER NOT IN BRACKETS'
+         AGO   .EREND
+.FEHL14  MNOTE 8,'EXCESSIVE PARAMETERS IN DO STATEMENT'
+         AGO   .EREND
+.FEHL15  MNOTE 8,'INVALID PARAMETER'
+         AGO   .EREND
+.FEHL16  MNOTE 8,'EXIT NEEDS CONDITION'
+         AGO   .EREND
+.FEHL17  MNOTE 8,'PARAMETER MISSING'
+         AGO   .EREND
+.FEHL18  MNOTE 8,'INVALID OPERAND IN DO STATEMENT'
+         AGO   .EREND
+.FEHL19  MNOTE 8,'DONAME NOT DEFINED'
+         AGO   .EREND
+.EREND   ANOP
+         MEXIT
+.*--------------------------------------------------------------------*
+.*
+.MACEND  ANOP
+         MEXIT
+         MEND
