@@ -1,0 +1,95 @@
+         MACRO
+&NAME    DOEXIT &P1,&P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9,&P10,&P11,&P12,    *
+               &P13,&P14,&P15,&P16,&P17,&P18,&P19,&P20,&DO=,&C=        *
+.*#-------------------------------------------------------------------*
+.*# TODO : &DO
+.*#-------------------------------------------------------------------*
+         LCLA  &I              INDEX FOR STRING SCANNING
+         LCLA  &N              TOTAL NESTING LEVEL
+         LCLC  &OPND
+         COPY  IFGLO
+.*
+&MACNA   SETC  'DOEXIT'
+&DOCOND  SETC  'DOCOND=DOEXIT'
+&IFLABEL SETA  &IFLABEL+1
+         AIF   (&IFLABEL GE &IFLIMIT).FEHL06
+.*
+&DOTRUE  SETC  '&IFLABEL'
+.*
+         AIF   ('&P1' EQ '').FEHL17      FORMAL TEST
+         AIF   (N'&SYSLIST EQ 1).STA03
+         AIF   ('&SYSLIST(2)' EQ 'AND').STA03
+         AIF   ('&SYSLIST(2)' EQ 'OR').STA03
+.* SETTING CONDITION PARENTHESES
+         AIF   (N'&SYSLIST GT 5).FEHL08        TOO MUCH OPERANDS
+         AIF   (N'&SYSLIST LT 4).FEHL09        TOO LESS OPERANDS
+&COND    SETC  '(&SYSLIST(1),&SYSLIST(2),&SYSLIST(3),&SYSLIST(4))'
+         IFPRO &DOTRUE,&DOENDLB(&DOLEVEL),&COND,&DOCOND               
+.*               &P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9,&P10,&P11,&P12,&P13,    *
+.*               &P14,&P15,&P16,&P17,&P18,&P19,&P20
+         AGO   .ENDCALL
+.STA03   ANOP
+.*--------------------------------------------------------------------*
+         IFPRO &DOTRUE,&DOENDLB(&DOLEVEL),&DOCOND,                     *
+               &P1,&P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9,&P10,&P11,&P12,&P13,*
+               &P14,&P15,&P16,&P17,&P18,&P19,&P20
+.*
+.*--------------------------------------------------------------------*
+.ENDCALL ANOP
+&OPND    SETC  '&IFPRAEF&DOTRUE'
+&OPND    DS    0H                        TARGET FOR BANCH ON NOT TRUE
+         AGO   .MACEND
+.*--------------------------------------------------------------------*
+.*         COPY IFERR
+.* TMAX ADD FOR COPY IFERR 
+.*#-------------------------------------------------------------------*
+.*# IFERR: ERROR MESSAGES FOR STRUCTURED PROGRAMMING-MACROS           *
+.*#-------------------------------------------------------------------*
+.FEHL01  MNOTE 8,'IFINIT MACRO NOT FIRST MACRO'
+         AGO   .EREND
+.FEHL02  MNOTE 8,'PRAEFIX BIGGER THAN 7 POSITIONS'
+         AGO   .EREND
+.FEHL03  MNOTE 8,'DEBUG NOT YES OR NO'
+         AGO   .EREND
+.FEHL04  MNOTE 8,'TRACE SWITCH NOT YES OR NO'
+         AGO   .EREND
+.FEHL05  MNOTE 8,'COMPARE CODE NOT IN BRACKETS'
+         AGO   .EREND
+.FEHL06  MNOTE 8,'TOO MUCH STRUCTURED MACROS IN THIS PROGRAM'
+         AGO   .EREND
+.FEHL07  MNOTE 8,'SHOULD NOT OCCUR'
+         AGO   .EREND
+.FEHL08  MNOTE 8,'TOO MUCH OPERANDS IN CONDITION'
+         AGO   .EREND
+.FEHL09  MNOTE 8,'NOT ENOUGH OPERANDS IN CONDITION'
+         AGO   .EREND
+.FEHL10  MNOTE 8,'AND/OR CONTINATION MISSING'
+         AGO   .EREND
+.FEHL11  MNOTE 8,'INVALID COMPARE OPERANDS'
+         AGO   .EREND
+.FEHL12  MNOTE 8,'FROM AND WHILE ARE EXCLUSIVE'
+         AGO   .EREND
+.FEHL13  MNOTE 8,'WHILE PARAMETER NOT IN BRACKETS'
+         AGO   .EREND
+.FEHL14  MNOTE 8,'EXCESSIVE PARAMETERS IN DO STATEMENT'
+         AGO   .EREND
+.FEHL15  MNOTE 8,'INVALID PARAMETER'
+         AGO   .EREND
+.FEHL16  MNOTE 8,'EXIT NEEDS CONDITION'
+         AGO   .EREND
+.FEHL17  MNOTE 8,'PARAMETER MISSING'
+         AGO   .EREND
+.FEHL18  MNOTE 8,'INVALID OPERAND IN DO STATEMENT'
+         AGO   .EREND
+.FEHL19  MNOTE 8,'DONAME NOT DEFINED'
+         AGO   .EREND
+.* TMAX ADD FOR UNTIL
+.FEHL20  MNOTE 8,'FROM AND UNTIL ARE EXCLUSIVE'
+         AGO   .EREND
+.EREND   ANOP
+         MEXIT
+.*--------------------------------------------------------------------*
+.*
+.MACEND  ANOP
+         MEXIT
+         MEND

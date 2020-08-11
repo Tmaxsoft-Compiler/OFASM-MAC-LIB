@@ -1,0 +1,153 @@
+         MACRO
+&NAME    WHEN  &P1,&P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9,&P10,&P11,&P12,&P13,*
+               &P14,&P15,&P16,&P17,&P18,&P19,&P20,&C=
+.*#-------------------------------------------------------------------*
+.*#     WHEN MACRO FOR STRUCTURED PROGRAMMING                         *
+.*#-------------------------------------------------------------------*
+         LCLA  &I              INDEX FOR STRING SCANNING
+         LCLA  &N              TOTAL NESTING LELVEL
+         LCLC  &OPND
+         COPY  IFGLO
+         LCLC  &WHENOP(20)
+         LCLA  &J
+         LCLA  &K
+.*
+&MACNA   SETC  'WHEN'
+.*
+         AIF   ('&P1' EQ '').FEHL17      FORMAL TEST
+.*--------------------------------------------------------------------*
+.*       GENERATE BRANCH TO ENDSEL                                    *
+.*--------------------------------------------------------------------*
+         AIF ('&SYSPARM' EQ '').OBR00
+         AIF ('&SYSPARM'(1,2) EQ 'NO').OBR00
+         AGO .OBR00
+&NAME    SVDOC   COM=CONT,C=&C,                                        *
+               &P1,&P2,&P3,&P4,&P5,&P6,&P7,&P8,&P9,&P10,&P11,&P12,&P13,*
+               &P14,&P15,&P16,&P17,&P18,&P19,&P20
+.*
+.OBR00   ANOP
+         AIF   ('&SELENDLB(&SELLEVEL)' NE '').NOEND  
+&SELLABEL SETA &SELLABEL+1
+         AIF   (&SELLABEL GE &IFLIMIT).FEHL06
+&SELENDLB(&SELLEVEL) SETC '&SELLABEL'
+         AGO   .FIRST
+.*
+.NOEND   ANOP
+&OPND    SETC  '&IFPRAEF&SELENDLB(&SELLEVEL)'
+         B     &OPND                       BRANCH TO ENDIF
+.*
+.FIRST  ANOP
+.*--------------------------------------------------------------------*
+.*       GENERATE TARGET FOR BRANCH ON ELSE                           *
+.*--------------------------------------------------------23-09-80-RS-*
+&OPND    SETC  '&IFPRAEF&SELFALSE(&SELLEVEL)'
+&OPND    DS    0H                          TARGET FOR BRANCH ON ELSE
+.*--------------------------------------------------------------------*
+.*       GENERATE NEXT ELSE LABEL                                     *
+.*--------------------------------------------------------23-09-80-RS-*
+&SELLABEL SETA  &SELLABEL+1
+         AIF   (&SELLABEL GE &IFLIMIT).FEHL06
+.*
+&SELFALSE(&SELLEVEL) SETC '&SELLABEL'         ID FOR NEXT ELSE ON LEVEL
+.*--------------------------------------------------------------------*
+.*       GENERATE TRUE LABEL                                          *
+.*--------------------------------------------------------23-09-80-RS-*
+&SELLABEL SETA  &SELLABEL+1
+         AIF   (&SELLABEL GE &IFLIMIT).FEHL06
+&SELTRUE  SETC  '&SELLABEL'                  TRUE LABEL FOR AND /OR
+.*
+.* SELECT CONDITION
+         AIF   ('&SELOP(&SELLEVEL)' EQ '').BASEIF
+         AIF   (N'&SYSLIST NE 1).FEHL11
+.STA03   ANOP
+&K       SETA  0
+&J       SETA  0
+.ORLOOP  ANOP
+&K       SETA  &K+1
+&J       SETA  &J+1
+&WHENOP(&K) SETC '(&SELOP(&SELLEVEL),&SYSLIST(1,&J))'
+.STA04   ANOP
+         AIF   ('&SYSLIST(1,&J+1)' NE '').STA05
+         AGO   .MULTIF
+.STA05   ANOP
+&K       SETA  &K+1
+&WHENOP(&K) SETC 'OR'
+         AGO   .ORLOOP
+.*--------------------------------------------------------------------*
+.*       CALL IF-PROCESSOR TO ANALYZE CONDITION                       *
+.*--------------------------------------------------------------------*
+.BASEIF  ANOP
+         IFPRO &SELTRUE,&SELFALSE(&SELLEVEL),&P1,&P2,&P3,&P4,&P5,&P6,  *
+               &P7,&P8,&P9,&P10,&P11,&P12,&P13,&P14,&P15,&P16,&P17,    *
+               &P18,&P19,&P20
+         AGO   .ENDCALL
+.MULTIF  ANOP
+         IFPRO &SELTRUE,&SELFALSE(&SELLEVEL),&WHENOP(1),&WHENOP(2),    *
+               &WHENOP(3),&WHENOP(4),&WHENOP(5),&WHENOP(6),&WHENOP(7), *
+               &WHENOP(8),&WHENOP(9),&WHENOP(10),&WHENOP(11),          *
+               &WHENOP(12),&WHENOP(13),&WHENOP(14),&WHENOP(15),        *
+               &WHENOP(16),&WHENOP(17),&WHENOP(18),&WHENOP(19),        *
+               &WHENOP(20)
+         AGO   .ENDCALL
+.*--------------------------------------------------------------------*
+.*       SET TRUE LABEL                                               *
+.*--------------------------------------------------------------------*
+.ENDCALL ANOP
+&OPND    SETC  '&IFPRAEF&SELTRUE'
+&OPND    DS    0H                        TARGET FOR BANCH ON NOT TRUE
+         AGO   .MACEND
+.*--------------------------------------------------------------------*
+.*
+.*         COPY IFERR
+.* TMAX ADD FOR COPY IFERR 
+.*#-------------------------------------------------------------------*
+.*# IFERR: ERROR MESSAGES FOR STRUCTURED PROGRAMMING-MACROS           *
+.*#-------------------------------------------------------------------*
+.FEHL01  MNOTE 8,'IFINIT MACRO NOT FIRST MACRO'
+         AGO   .EREND
+.FEHL02  MNOTE 8,'PRAEFIX BIGGER THAN 7 POSITIONS'
+         AGO   .EREND
+.FEHL03  MNOTE 8,'DEBUG NOT YES OR NO'
+         AGO   .EREND
+.FEHL04  MNOTE 8,'TRACE SWITCH NOT YES OR NO'
+         AGO   .EREND
+.FEHL05  MNOTE 8,'COMPARE CODE NOT IN BRACKETS'
+         AGO   .EREND
+.FEHL06  MNOTE 8,'TOO MUCH STRUCTURED MACROS IN THIS PROGRAM'
+         AGO   .EREND
+.FEHL07  MNOTE 8,'SHOULD NOT OCCUR'
+         AGO   .EREND
+.FEHL08  MNOTE 8,'TOO MUCH OPERANDS IN CONDITION'
+         AGO   .EREND
+.FEHL09  MNOTE 8,'NOT ENOUGH OPERANDS IN CONDITION'
+         AGO   .EREND
+.FEHL10  MNOTE 8,'AND/OR CONTINATION MISSING'
+         AGO   .EREND
+.FEHL11  MNOTE 8,'INVALID COMPARE OPERANDS'
+         AGO   .EREND
+.FEHL12  MNOTE 8,'FROM AND WHILE ARE EXCLUSIVE'
+         AGO   .EREND
+.FEHL13  MNOTE 8,'WHILE PARAMETER NOT IN BRACKETS'
+         AGO   .EREND
+.FEHL14  MNOTE 8,'EXCESSIVE PARAMETERS IN DO STATEMENT'
+         AGO   .EREND
+.FEHL15  MNOTE 8,'INVALID PARAMETER'
+         AGO   .EREND
+.FEHL16  MNOTE 8,'EXIT NEEDS CONDITION'
+         AGO   .EREND
+.FEHL17  MNOTE 8,'PARAMETER MISSING'
+         AGO   .EREND
+.FEHL18  MNOTE 8,'INVALID OPERAND IN DO STATEMENT'
+         AGO   .EREND
+.FEHL19  MNOTE 8,'DONAME NOT DEFINED'
+         AGO   .EREND
+.* TMAX ADD FOR UNTIL
+.FEHL20  MNOTE 8,'FROM AND UNTIL ARE EXCLUSIVE'
+         AGO   .EREND
+.EREND   ANOP
+         MEXIT
+.*--------------------------------------------------------------------*
+.*
+.MACEND  ANOP
+         MEXIT
+         MEND

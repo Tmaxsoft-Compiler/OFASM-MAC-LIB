@@ -1,0 +1,55 @@
+         MACRO
+&NAME    ENDSEL &COMMENT,&C=
+.*#-------------------------------------------------------------------*
+.*# ENDSEL: MACRO  CLOSE CURRENT SELECT LEVEL                         *
+.*#-------------------------------------------------------------------*
+.*# TMAX ADD                                                          *
+.*# FUNCTION: THE ACTUAL 'SELECT' LEVEL WILL BE CLOSED.               *
+.*#                                                                   *
+.*# CODING:   ENDSEL      (NO OPERANDS)                               *
+.*#                                                                   *
+.*#-------------------------------------------------------------------*
+         COPY  IFGLO
+         LCLC  &OPND
+         LCLA  &N
+.*
+&MACNA   SETC  'ENDSEL'
+.*
+.*--------------------------------------------------------------------*
+.*       IF WITHOUT OTHERWISE: GENERATE OTHER LABEL                   *
+.*--------------------------------------------------------23-09-80-RS-*
+         AIF   (&SELLEVEL GT 0).OBR20
+    MNOTE 12,' ??????  ADIOS LOGIC !!!,     EMERGENCY MESSAGE FROM STRU*
+               CTURED PROGRAMMING SYSTEM.'
+         MEXIT
+.*
+.OBR20   ANOP
+         AIF ('&SYSPARM' EQ '').OBR00
+         AIF ('&SYSPARM'(1,2) EQ 'NO').OBR00
+         AGO     .OBR00
+&NAME    SVDOC   COM=END,C=&C
+.OBR00   ANOP
+         AIF   ('&SELFALSE(&SELLEVEL)' EQ '').NOELSE
+&OPND    SETC  '&IFPRAEF&SELFALSE(&SELLEVEL)'
+&OPND    DS    0H                          TARGET FOR ELSE BRANCH
+.NOELSE  ANOP
+.*--------------------------------------------------------------------*
+.*       GENERATE ENDSEL LABEL IF NECESSARY                           *
+.*--------------------------------------------------------23-09-80-RS-*
+         AIF   ('&SELENDLB(&SELLEVEL)' EQ '').NOENDIF
+&OPND    SETC  '&IFPRAEF&SELENDLB(&SELLEVEL)'
+&OPND    DS    0H                          TARGET FOR ENDIF BRANCH
+.NOENDIF ANOP
+.*--------------------------------------------------------------------*
+.*       RESET FUNCTIONS OF THIS IF-LEVEL                             *
+.*--------------------------------------------------------23-09-80-RS-*
+&SELTRUE  SETC  ''
+&SELFALSE(&SELLEVEL) SETC ''
+&SELENDLB(&SELLEVEL) SETC ''
+&SELOP(&SELLEVEL) SETC ''
+&SELCMP(&SELLEVEL) SETC ''
+&SELLEVEL SETA &SELLEVEL-1
+         AGO   .MACEND
+.MACEND  ANOP
+         MEXIT
+         MEND
