@@ -189,6 +189,7 @@
 &I       SETA  &I+1
 .* TMAX ADD FOR UNTIL
          AIF   ('&DOCOND' EQ 'UNTIL').DOCOND
+         AIF   ('&DOCOND' EQ 'DOEXIT').DOCOND
          AIF   ('&SYSLIST(&I)' EQ 'OR').BIGOR
 &OPND    SETC  '15-&COND,&IFPRAEF&FALSE'
          BC    &OPND                       BRANCH IF NOT TRUE
@@ -202,7 +203,12 @@
          AGO   .BIGLOP
 .* TMAX ADD FOR UNTIL
 .DOCOND ANOP
+         AIF   ('&SYSLIST(&I)' EQ 'AND').DOAND
 &OPND    SETC  '&COND,&IFPRAEF&FALSE'
+         BC    &OPND
+         AGO   .BIGLOP
+.DOAND   ANOP
+&OPND    SETC  '15-&COND,&IFPRAEF&TRUE'
          BC    &OPND
          AGO   .BIGLOP
 .*

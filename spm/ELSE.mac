@@ -46,7 +46,8 @@
 &IFFALSE(&IFLEVEL) SETC ''
          AGO   .MACEND
 .*
-.*SYLEE         COPY  IFERR
+.*         COPY IFERR
+.* TMAX ADD FOR COPY IFERR 
 .*#-------------------------------------------------------------------*
 .*# IFERR: ERROR MESSAGES FOR STRUCTURED PROGRAMMING-MACROS           *
 .*#-------------------------------------------------------------------*

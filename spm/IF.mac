@@ -38,6 +38,9 @@
 &IFLIMIT SETA  100000
 &IFPRAEF SETC  '##'
 &IFDEBUG SETB  0
+.* TMAX ADD FOR SELECT
+&SELLEVEL SETA 0
+&SELLABEL SETA 0
 .*--------------------------------------------------------------------*
 .*       INCREMENT LEVEL. GENERATE LABELS FOR FALSE/TRUE              *
 .*--------------------------------------------------------------------*
@@ -76,7 +79,8 @@
 &OPND    DS    0H                        TARGET FOR BANCH ON NOT TRUE
          AGO   .MACEND
 .*
-.*SYLEE         COPY IFERR
+.*         COPY IFERR
+.* TMAX ADD FOR COPY IFERR 
 .*#-------------------------------------------------------------------*
 .*# IFERR: ERROR MESSAGES FOR STRUCTURED PROGRAMMING-MACROS           *
 .*#-------------------------------------------------------------------*
