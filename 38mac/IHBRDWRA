@@ -1097,7 +1097,7 @@
 .IHBCKP2 AIF   ('&CHAR2' EQ ')').IHBGOP2                                61722900
          AGO   .IHBERQ2                                                 61723600
 .IHBCKQ2 AIF   ('&CHAR2' EQ '''').IHBGOP2                               61724300
-.IHBERQ2 MNOTE 0,SEQNO=&SEQNO INVALID - IGNORED'                        61725000
+.IHBERQ2 MNOTE 0,'SEQNO=&SEQNO INVALID - IGNORED'                        61725000
          MNOTE 0,'CHECK FOR UNBALANCED PARENTHESES OR APOSTROPHES'      61725700
          AGO   .CKIBSQV                                                 61726400
 .IHBGOP2  ANOP                                                          61727100
